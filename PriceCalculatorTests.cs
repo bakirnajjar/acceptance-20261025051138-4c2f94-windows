@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Xunit;
 
 namespace Acceptance.Pricing
@@ -37,6 +38,22 @@ namespace Acceptance.Pricing
         {
             var items = new List<LineItem> { new LineItem("A", 2, 1000), new LineItem("B", 3, 250) };
             Assert.Equal("5 item(s), discount 1.38, total 26.12", PriceCalculator.Receipt(items, "LOYAL5"));
+        }
+
+        [Fact]
+        public void ReceiptUsesInvariantFormattingAndNormalizesCouponUnderFrenchCulture()
+        {
+            CultureInfo previousCulture = CultureInfo.CurrentCulture;
+            try
+            {
+                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+                var items = new List<LineItem> { new LineItem("A", 2, 1234) };
+                Assert.Equal("2 item(s), discount 2.47, total 22.21", PriceCalculator.Receipt(items, " spring10 "));
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = previousCulture;
+            }
         }
 
         [Fact]
